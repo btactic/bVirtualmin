@@ -1,0 +1,13 @@
+; Configuración servidores Virtualmin a sincronizar
+; Se debe indicar un usuario con acceso SSH (sin contraseña)
+; Ese usuario debe poder ejecutar el comando $ sudo virtualmin (sin contraseña)
+
+[server_1]
+host = 'virtualmin001.example.com'
+port = 22
+user = 'bvirtualmin'
+
+[server_2]
+host = 'virtualmin002.example.com'
+port = 22
+user = 'bvirtualmin'
