@@ -33,6 +33,35 @@ abstract class Virtualserver {
         $bean->databases_size = $virtualserver->databases_size;
         $bean->quota = $virtualserver->quota;
         $bean->save();
+        self::relate_virtualserver_with_ip($bean, $virtualserver->ip);
+        self::relate_virtualserver_with_vm($bean, $virtualserver->ip);
+    }
+
+    static private function relate_virtualserver_with_ip($virtualserver_bean, $ip) {
+        $keys_values = array();
+        $keys_values['name'] = $ip;
+        $ip_bean = retrieve_record_bean('btc_IP', $keys_values);
+        if (!empty($ip_bean->id)) {
+            $ip_bean->load_relationship('btc_hosting_btc_ip');
+            $ip_bean->btc_hosting_btc_ip->add($virtualserver_bean);
+        }
+    }
+
+    static private function relate_virtualserver_with_vm($virtualserver_bean, $ip) {
+        $select = "SELECT mv.id";
+        $from = "FROM btc_ip i, btc_maquinas_virtuales_btc_ip_c mvip, btc_maquinas_virtuales mv";
+        $where = "WHERE i.name = '".$ip."' AND i.id = mvip.btc_maquinas_virtuales_btc_ipbtc_ip_idb "
+                ."AND mvip.btc_maquinas_virtuales_btc_ipbtc_maquinas_virtuales_ida = mv.id "
+                ."AND i.deleted = 0 AND mv.deleted = 0 AND mvip.deleted = 0";
+        $sql = $select." ".$from." ".$where;
+        $mv_id = $GLOBALS['db']->getOne($sql);
+        if (!empty($mv_id)) {
+            $keys_values = array();
+            $keys_values['id'] = $mv_id;
+            $mv_bean = retrieve_record_bean('btc_Maquinas_virtuales', $keys_values);
+            $mv_bean->load_relationship('btc_hosting_btc_maquinas_virtuales');
+            $mv_bean->btc_hosting_btc_maquinas_virtuales->add($virtualserver_bean);
+        }
     }
 
 }
