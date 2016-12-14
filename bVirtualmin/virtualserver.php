@@ -19,9 +19,7 @@ abstract class Virtualserver {
     }
 
     static public function sync_virtualserver($virtualserver) {
-        $keys_values = array();
-        $keys_values['name'] = $virtualserver->virtualserver;
-        $bean = retrieve_record_bean('btc_Hosting', $keys_values);
+        $bean = self::get_virtualserver_bean($virtualserver->virtualserver);
         $bean->name = $virtualserver->virtualserver;
         $bean->description = $virtualserver->description;
         //$bean->fecha_creacion = $virtualserver->created_on;
@@ -61,6 +59,22 @@ abstract class Virtualserver {
             $mv_bean = retrieve_record_bean('btc_Maquinas_virtuales', $keys_values);
             $mv_bean->load_relationship('btc_hosting_btc_maquinas_virtuales');
             $mv_bean->btc_hosting_btc_maquinas_virtuales->add($virtualserver_bean);
+        }
+    }
+
+    static private function get_virtualserver_bean($virtualserver_name) {
+        $select = "SELECT h.id";
+        $from = "FROM btc_hosting h, btc_hosting_btc_ip_c hip, btc_ip ip";
+        $where = "WHERE h.name = '".$virtualserver_name."' "
+                ."AND ip.id = hip.btc_hosting_btc_ipbtc_ip_ida "
+                ."AND hip.btc_hosting_btc_ipbtc_hosting_idb = h.id "
+                ."AND h.deleted = 0 AND hip.deleted = 0 AND ip.deleted = 0";
+        $sql = $select." ".$from." ".$where;
+        $virtualserver_id = $GLOBALS['db']->getOne($sql);
+        if (empty($virtualserver_id)) {
+            return BeanFactory::newBean('btc_Hosting');
+        } else {
+            return BeanFactory::getBean('btc_Hosting', $virtualserver_id);
         }
     }
 
