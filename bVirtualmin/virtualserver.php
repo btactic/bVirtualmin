@@ -80,6 +80,12 @@ abstract class Virtualserver {
         }
     }
 
+    static public function set_all_hosts_to_disabled() {
+        $sql = "UPDATE btc_hosting SET estado_host = 'Baja' "
+                ."WHERE deleted = 0 AND estado_host = 'Vigente'";
+        $result = $GLOBALS['db']->query($sql);
+    }
+
 }
 
 ?>
