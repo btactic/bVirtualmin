@@ -39,10 +39,12 @@ abstract class Virtualserver {
         $keys_values = array();
         $keys_values['name'] = $ip;
         $ip_bean = retrieve_record_bean('btc_IP', $keys_values);
-        if (!empty($ip_bean->id)) {
-            $ip_bean->load_relationship('btc_hosting_btc_ip');
-            $ip_bean->btc_hosting_btc_ip->add($virtualserver_bean);
+        if (empty($ip_bean->id)) {
+            $ip_bean->name = $ip;
+            $ip_bean->save();
         }
+        $ip_bean->load_relationship('btc_hosting_btc_ip');
+        $ip_bean->btc_hosting_btc_ip->add($virtualserver_bean);
     }
 
     static private function relate_virtualserver_with_vm($virtualserver_bean, $ip) {
