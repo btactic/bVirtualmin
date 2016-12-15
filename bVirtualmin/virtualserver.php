@@ -13,6 +13,8 @@ abstract class Virtualserver {
 
     static public function sync_all_virtualservers_of_virtualmin($virtualmin_server) {
         $virtualservers = VirtualminAPI::get_virtualservers_of_virtualmin($virtualmin_server);
+        $GLOBALS['log']->fatal("[bVirtualmin] Syncing ".count($virtualservers)
+                ." virtualservers from '".$virtualmin_server['host']."'.");
         foreach($virtualservers as $virtualserver) {
             self::sync_virtualserver($virtualserver);
         }
