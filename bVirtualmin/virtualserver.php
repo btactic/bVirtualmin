@@ -5,6 +5,8 @@ require_once('bVirtualmin/bean_utils.php');
 
 abstract class Virtualserver {
 
+    private static $get_a_record_of_dns_script = 'bVirtualmin/scripts/get_a_record_of_dns.sh';
+
     static public function sync_all_virtualservers() {
         foreach(VirtualminAPI::get_virtualmin_servers() as $server) {
             self::sync_all_virtualservers_of_virtualmin($server);
@@ -21,7 +23,7 @@ abstract class Virtualserver {
     }
 
     static public function sync_virtualserver($virtualserver) {
-        $bean = self::get_virtualserver_bean($virtualserver->virtualserver);
+        $bean = self::get_virtualserver_bean($virtualserver);
         $bean->name = $virtualserver->virtualserver;
         $bean->description = $virtualserver->description;
         //$bean->fecha_creacion = $virtualserver->created_on;
@@ -32,6 +34,8 @@ abstract class Virtualserver {
         $bean->used_quota = $virtualserver->used_quota;
         $bean->databases_size = $virtualserver->databases_size;
         $bean->quota = $virtualserver->quota;
+        $bean->verificacion_campo_a = self::a_record_of_dns_match(
+                $virtualserver->virtualserver, $virtualserver->ip);
         $bean->save();
         self::relate_virtualserver_with_ip($bean, $virtualserver->ip);
         self::relate_virtualserver_with_vm($bean, $virtualserver->ip);
@@ -66,10 +70,11 @@ abstract class Virtualserver {
         }
     }
 
-    static private function get_virtualserver_bean($virtualserver_name) {
+    static private function get_virtualserver_bean($virtualserver) {
         $select = "SELECT h.id";
         $from = "FROM btc_hosting h, btc_hosting_btc_ip_c hip, btc_ip ip";
-        $where = "WHERE h.name = '".$virtualserver_name."' "
+        $where = "WHERE h.name = '".$virtualserver->virtualserver."' "
+                ."AND ip.name = '".$virtualserver->ip."' "
                 ."AND ip.id = hip.btc_hosting_btc_ipbtc_ip_ida "
                 ."AND hip.btc_hosting_btc_ipbtc_hosting_idb = h.id "
                 ."AND h.deleted = 0 AND hip.deleted = 0 AND ip.deleted = 0";
@@ -86,6 +91,10 @@ abstract class Virtualserver {
         $sql = "UPDATE btc_hosting SET estado_host = 'Baja' "
                 ."WHERE deleted = 0 AND estado_host = 'Vigente'";
         $result = $GLOBALS['db']->query($sql);
+    }
+
+    static private function a_record_of_dns_match($domain, $ip) {
+        return exec(self::$get_a_record_of_dns_script." ".$domain) == $ip;
     }
 
 }
