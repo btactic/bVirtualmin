@@ -93,6 +93,12 @@ abstract class Virtualserver {
         $result = $GLOBALS['db']->query($sql);
     }
 
+    static public function set_all_hosts_to_inactive() {
+        $sql = "UPDATE btc_hosting SET activo = 0 "
+                ."WHERE deleted = 0 AND activo = 1";
+        $result = $GLOBALS['db']->query($sql);
+    }
+
     static private function a_record_of_dns_match($domain, $ip) {
         return exec(self::$get_a_record_of_dns_script." ".$domain) == $ip;
     }
