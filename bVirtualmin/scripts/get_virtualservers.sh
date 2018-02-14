@@ -2,7 +2,7 @@
 
 sudo virtualmin list-domains --multiline | awk '
 
-    /^([a-z]+.?)+$/ {
+    /^[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}$/ {
         printf "{\"virtualserver\":\"" $1 "\","
     }
 
