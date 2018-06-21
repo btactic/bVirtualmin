@@ -4,6 +4,7 @@ abstract class VirtualminAPI {
 
     private static $get_virtualservers_script = 'bVirtualmin/scripts/get_virtualservers.sh';
     private static $parse_virtualservers_script = 'bVirtualmin/scripts/parse_virtualservers.sh';
+    private static $get_virtualmin_ips_script = 'bVirtualmin/scripts/get_virtualmin_ips.sh';
     private static $virtualmin_servers_config_file = 'bVirtualmin/config/virtualmin_servers.ini';
 
     static public function get_virtualservers_of_virtualmin($virtualmin_server) {
@@ -18,6 +19,13 @@ abstract class VirtualminAPI {
             if (!empty($virtualserver)) $virtualservers[] = $virtualserver;
         }
         return $virtualservers;
+    }
+
+    static public function get_virtualmin_ips($virtualmin_server) {
+        return self::execute_command_on_server(
+            $virtualmin_server,
+            "$(cat ".self::$get_virtualmin_ips_script.")"
+        );
     }
 
     static private function execute_command_on_server($virtualmin_server, $cmd,

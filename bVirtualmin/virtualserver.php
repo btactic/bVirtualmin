@@ -14,6 +14,11 @@ abstract class Virtualserver {
     }
 
     static public function sync_all_virtualservers_of_virtualmin($virtualmin_server) {
+        $virtualmin_ips = VirtualminAPI::get_virtualmin_ips($virtualmin_server);
+        foreach($virtualmin_ips as $virtualmin_ip) {
+            self::set_all_ip_hosts_as_disabled($virtualmin_ip);
+            self::set_all_ip_hosts_as_inactive($virtualmin_ip);
+        }
         $virtualservers = VirtualminAPI::get_virtualservers_of_virtualmin($virtualmin_server);
         $GLOBALS['log']->fatal("[bVirtualmin] Syncing ".count($virtualservers)
                 ." virtualservers from '".$virtualmin_server['host']."'.");
@@ -28,7 +33,7 @@ abstract class Virtualserver {
         $bean->description = $virtualserver->description;
         //$bean->fecha_creacion = $virtualserver->created_on;
         $bean->activo = isset($virtualserver->disabled) ? '0' : '1';
-        $bean->estado_host = 'Vigente';
+        $bean->estado_host = isset($virtualserver->disabled) ? 'Suspendida' : 'Vigente';
         $bean->disabled_description = isset($virtualserver->disabled_description) ?
                 $virtualserver->disabled_description : '';
         $bean->used_quota = $virtualserver->used_quota;
@@ -93,10 +98,30 @@ abstract class Virtualserver {
         $result = $GLOBALS['db']->query($sql);
     }
 
+    static private function set_all_ip_hosts_as_disabled($ip) {
+        $sql = "UPDATE btc_hosting_btc_ip_c hip, btc_ip i, btc_hosting h "
+            ."SET h.estado_host = 'Baja' "
+            ."WHERE hip.deleted = 0 AND i.deleted = 0 AND h.deleted = 0 "
+                ."AND hip.btc_hosting_btc_ipbtc_hosting_idb = h.id "
+                ."AND hip.btc_hosting_btc_ipbtc_ip_ida = i.id "
+                ."AND i.name = '$ip'";
+        $GLOBALS['db']->query($sql);
+    }
+
     static public function set_all_hosts_to_inactive() {
         $sql = "UPDATE btc_hosting SET activo = 0 "
                 ."WHERE deleted = 0 AND activo = 1";
         $result = $GLOBALS['db']->query($sql);
+    }
+
+    static private function set_all_ip_hosts_as_inactive($ip) {
+        $sql = "UPDATE btc_hosting_btc_ip_c hip, btc_ip i, btc_hosting h "
+            ."SET h.activo = 0 "
+            ."WHERE hip.deleted = 0 AND i.deleted = 0 AND h.deleted = 0 "
+                ."AND hip.btc_hosting_btc_ipbtc_hosting_idb = h.id "
+                ."AND hip.btc_hosting_btc_ipbtc_ip_ida = i.id "
+                ."AND h.activo = 1 AND i.name = '$ip'";
+        $GLOBALS['db']->query($sql);
     }
 
     static private function a_record_of_dns_match($domain, $ip) {
