@@ -22,7 +22,8 @@ abstract class Virtualserver {
         $virtualservers = VirtualminAPI::get_virtualservers_of_virtualmin($virtualmin_server);
         $GLOBALS['log']->fatal("[bVirtualmin] Syncing ".count($virtualservers)
                 ." virtualservers from '".$virtualmin_server['host']."'.");
-        foreach($virtualservers as $virtualserver) {
+        foreach($virtualservers as $virtualserverAsAnArray) {
+            $virtualserver = json_decode(json_encode($virtualserverAsAnArray));
             self::sync_virtualserver($virtualserver);
         }
     }
@@ -124,8 +125,23 @@ abstract class Virtualserver {
         $GLOBALS['db']->query($sql);
     }
 
+    static private function get_domain_first_a_record($domain) {
+        $a_record = '';
+        $dns_result = null;
+        $dns_results = dns_get_record($domain, DNS_A);
+        if (!empty($dns_results)) {
+            $dns_result = $dns_results[0];
+        }
+        if (!($dns_result == null)) {
+            if (isset($dns_result['ip'])) {
+                $a_record = $dns_result['ip'];
+            }
+        }
+        return($a_record);
+    }
+
     static private function a_record_of_dns_match($domain, $ip) {
-        return exec(self::$get_a_record_of_dns_script." ".$domain) == $ip;
+        return (self::get_domain_first_a_record($domain) == $ip) ;
     }
 
 }
