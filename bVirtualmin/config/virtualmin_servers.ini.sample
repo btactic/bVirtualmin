@@ -1,7 +1,7 @@
-; Configuración servidores Virtualmin a sincronizar
-; Se debe indicar un usuario webmin (Create a new privileged users)
-; Que únicamente tenga activado: Virtualmin Virtual Servers dentro de la sección Servers.
-; Así como su contraseña
+; Virtualmin servers to sync
+;
+; User must be a `webmin user` (Create a new privileged users)
+; Make sure only uses `Virtualmin Virtual Servers` permission under `Servers` section.
 
 [server_1]
 host = 'virtualmin001.example.com'
