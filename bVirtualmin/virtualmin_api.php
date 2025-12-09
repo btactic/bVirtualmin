@@ -33,6 +33,7 @@ abstract class VirtualminAPI {
                 $virtualserver["quota"] = "";
                 $virtualserver["used_quota"] = "";
                 $virtualserver["databases_size"] = "";
+                $virtualserver["php_version"] = "";
 
                 if (isset($virtualmin_server->name)) {
                     $virtualserver["virtualserver"] = $virtualmin_server->name;
@@ -56,6 +57,9 @@ abstract class VirtualminAPI {
                 }
                 if (isset($virtualmin_server->values->databases_size)) {
                     $virtualserver["databases_size"] = $virtualmin_server->values->databases_size[0];
+                }
+                if (isset($virtualmin_server->values->php_version)) {
+                    $virtualserver["php_version"] = $virtualmin_server->values->php_version[0];
                 }
 
                 $virtualservers[] = $virtualserver;

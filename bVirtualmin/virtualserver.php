@@ -40,6 +40,7 @@ abstract class Virtualserver {
         $bean->used_quota = $virtualserver->used_quota;
         $bean->databases_size = $virtualserver->databases_size;
         $bean->quota = $virtualserver->quota;
+        $bean->php_version_c = $virtualserver->php_version;
         $bean->verificacion_campo_a = self::a_record_of_dns_match(
                 $virtualserver->virtualserver, $virtualserver->ip);
         $bean->save();
